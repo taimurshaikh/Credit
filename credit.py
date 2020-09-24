@@ -1,30 +1,23 @@
 import sys
 import os
 import time
+import random
 
 def main():
   result = 1
 
   while result:
-      ask = input("""Choose an option:
-    1. Check my Card
-    2. Import numbers to check
-    3. Generate a valid CC number
-    4. Quit """)
+      ask = input("Choose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Quit ")
       menuOptions = [str(x) for x in range(1, 5)]
       while ask not in menuOptions:
           print()
-          ask = input("""Choose an option:
-          1. Check my Card
-          2. Import numbers to check
-          3. Generate a valid CC number
-          4. Quit """)
+          ask = input("Choose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Quit ")
 
       result = 0
 
-      if ask == "1": checkUserCard()
-      elif ask == "2": importNumbers()
-      elif ask == "3": generateNumbers()
+      if ask == "1": result = checkUserCard()
+      elif ask == "2": result = importNumbers()
+      elif ask == "3": result = generateNumbers()
       else: result = quit()
 
 def luhnsAlgorithm(sequence):
@@ -43,7 +36,7 @@ def luhnsAlgorithm(sequence):
     # CC is valid if last digit is 0
     return True if str(total)[-1] == "0" else False
 
-def isValid(sequence):
+def isValidSequence(sequence):
     if len(sequence) != 16:
         print("\nINVALID LENGTH OF CC NUMBER\n")
         return 0
@@ -54,41 +47,84 @@ def isValid(sequence):
         return 0
     return 1
 
+def isValidInt(num):
+    try:
+        num = int(num)
+    except ValueError:
+        return 0
+    if num < 1 or num > 100: return 0
+    return 1
+
 def checkUserCard():
-    userIn = input("Enter credit card number:\n")
+    userIn = input("Enter credit card number: ")
 
-    if not isValid(userIn):
-        return False
+    while not isValidSequence(userIn):
+        userIn = input("Enter credit card number: ")
 
-    if luhnsAlgorithm(userIn):
+    if not luhnsAlgorithm(userIn):
+        print("\nCC NUMBER IS INVALID\n")
+
+    else:
         print("\nCC NUMBER IS VALID\n")
-        return True
-
-    print("\nCC NUMBER IS INVALID\n")
-    return False
+    return True
 
 def importNumbers():
 
-    # VALIDATION
-    userIn = input("Enter file path:\n")
+    # Check if file exists
+    userIn = input("Enter file path: ")
     while not os.path.exists(userIn):
-        userIn = input("Invalid file path. Try again:\n")
+        userIn = input("Invalid file path. Try again: ")
 
-    # READING FILE and VALIDATING LINES
+    # Reading file and validating each line
     with open(userIn, "r") as f:
         for i, line in enumerate(f.readlines()):
 
+            # Ignores the empty line at the end of the file
+            if not line: continue
+
             # First we must check if the line obeys the constraints of the CC number(length 16, no non-integers)
-            if not isValid(line.strip()):
-                print(f"Line {i} is NOT a valid CC number")
+            if not isValidSequence(line.strip()):
+                print(line.strip())
+                print(f"Line {i+1} is NOT a valid CC number")
                 time.sleep(0.5)
                 continue
             if luhnsAlgorithm(line.strip()):
-                print(f"Line {i} is a valid CC number")
+                print(f"Line {i+1} is a valid CC number")
                 time.sleep(0.5)
             else:
-                print(f"Line {i} is NOT a valid CC number")
+                print(f"Line {i+1} is NOT a valid CC number")
                 time.sleep(0.5)
+    print("\n")
+    return 1
+
+def generateNumbers():
+
+    userIn = input("How many CC numbers would you like to generate? ")
+
+    # Validating the number inputted
+    while not isValidInt(userIn):
+        userIn = input("Invalid input. Try again: ")
+
+    userIn = int(userIn)
+
+    res_lst = []
+    # Generating random 16 digit sequences and checking if they follow the checksum
+    # NOTE: Probably a better way to do this. This is a brute force approach
+    while len(res_lst) != userIn:
+        randSequence = ''.join([str(random.randint(0, 9)) for i in range(16)])
+
+        if luhnsAlgorithm(randSequence) and randSequence not in res_lst:
+            res_lst.append(randSequence)
+
+    print('\n'.join(res_lst))
+
+    # Creating new file with generated CC numbers
+    with open("generated.txt", "w") as f:
+        for res in res_lst:
+            f.write(res + "\n")
+    print("New file created.\n")
+    return 1
+
 def quit():
     ask = input("Are you sure want to quit? ").lower()
     menuOptions = ["y", "yes", "n", "no"]
