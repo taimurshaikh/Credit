@@ -7,32 +7,29 @@ def main():
   result = 1
 
   while result:
-      ask = input("Choose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Quit ")
-      menuOptions = [str(x) for x in range(1, 5)]
+      ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5.Quit ")
+      menuOptions = [str(x) for x in range(1, 6)]
       while ask not in menuOptions:
           print()
-          ask = input("Choose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Quit ")
+          ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5.Quit ")
 
       result = 0
 
       if ask == "1": result = checkUserCard()
       elif ask == "2": result = importNumbers()
       elif ask == "3": result = generateNumbers()
+      elif ask == "4": result = completeSequence()
       else: result = quit()
 
 def luhnsAlgorithm(sequence):
 
     # Creating new string sequence with every other digit * 2, starting from second to last digit
     eod = ''.join([str(int(x) * 2) for x in sequence[::-1][1::2]])
-
     # Add eod's DIGITS together
     eodDigitSum = sum([int(x) for x in eod])
-
     # Sum of digits that weren't multiplied by 2
     everythingElse = sum([int(x) for x in sequence[::-1][::2]])
-
     total = eodDigitSum + everythingElse
-
     # CC is valid if last digit is 0
     return True if str(total)[-1] == "0" else False
 
@@ -54,6 +51,12 @@ def isValidInt(num):
         return 0
     if num < 1 or num > 100: return 0
     return 1
+
+def createFile(filename, res_lst):
+    with open("generated.txt", "w") as f:
+        for res in res_lst:
+            f.write(res + "\n")
+    print("\nNew file created.\n")
 
 def checkUserCard():
     userIn = input("Enter credit card number: ")
@@ -119,10 +122,30 @@ def generateNumbers():
     print('\n'.join(res_lst))
 
     # Creating new file with generated CC numbers
-    with open("generated.txt", "w") as f:
-        for res in res_lst:
-            f.write(res + "\n")
-    print("New file created.\n")
+    createFile("generated.txt", res_lst)
+    return 1
+
+def completeSequence():
+
+    userIn = input("Enter incomplete number: ")
+
+    while len(userIn) >= 16 and not isValidInt(userIn):
+         userIn = input("Invalid input. Try again: ")
+
+
+    missingNumberCount = 16 - len(userIn)
+    upperBound = 100 * missingNumberCount
+    res_lst = []
+
+    for i in range(upperBound):
+        currentSequence = userIn +  "0" * (missingNumberCount - len(str(i))) + str(i)
+        if luhnsAlgorithm(currentSequence):
+            res_lst.append(currentSequence)
+
+    print('\n'.join(res_lst))
+
+    createFile("possibleSequences.txt", res_lst)
+
     return 1
 
 def quit():
