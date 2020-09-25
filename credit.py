@@ -7,11 +7,11 @@ def main():
   result = 1
 
   while result:
-      ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5.Quit ")
+      ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5. Quit ")
       menuOptions = [str(x) for x in range(1, 6)]
       while ask not in menuOptions:
           print()
-          ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5.Quit ")
+          ask = input("\nChoose an option:\n1. Check my Card\n2. Import numbers to check\n3. Generate valid CC numbers\n4. Complete number with missing digits\n5. Quit ")
 
       result = 0
 
@@ -25,11 +25,15 @@ def luhnsAlgorithm(sequence):
 
     # Creating new string sequence with every other digit * 2, starting from second to last digit
     eod = ''.join([str(int(x) * 2) for x in sequence[::-1][1::2]])
+
     # Add eod's DIGITS together
     eodDigitSum = sum([int(x) for x in eod])
+
     # Sum of digits that weren't multiplied by 2
     everythingElse = sum([int(x) for x in sequence[::-1][::2]])
+
     total = eodDigitSum + everythingElse
+
     # CC is valid if last digit is 0
     return True if str(total)[-1] == "0" else False
 
@@ -60,6 +64,7 @@ def createFile(filename, res_lst):
 
 def checkUserCard():
     userIn = input("Enter credit card number: ")
+    if checkForExit(userIn): return 1
 
     while not isValidSequence(userIn):
         userIn = input("Enter credit card number: ")
@@ -72,9 +77,10 @@ def checkUserCard():
     return True
 
 def importNumbers():
-
     # Check if file exists
     userIn = input("Enter file path: ")
+    if checkForExit(userIn): return 1
+
     while not os.path.exists(userIn):
         userIn = input("Invalid file path. Try again: ")
 
@@ -101,8 +107,8 @@ def importNumbers():
     return 1
 
 def generateNumbers():
-
     userIn = input("How many CC numbers would you like to generate? ")
+    if checkForExit(userIn): return 1
 
     # Validating the number inputted
     while not isValidInt(userIn):
@@ -126,8 +132,8 @@ def generateNumbers():
     return 1
 
 def completeSequence():
-
     userIn = input("Enter incomplete number: ")
+    if checkForExit(userIn): return 1
 
     while len(userIn) >= 16 and not isValidInt(userIn):
          userIn = input("Invalid input. Try again: ")
@@ -147,6 +153,9 @@ def completeSequence():
     createFile("possibleSequences.txt", res_lst)
 
     return 1
+
+def checkForExit(userIn):
+    return 1 if userIn.lower() == "quit" else 0
 
 def quit():
     ask = input("Are you sure want to quit? ").lower()
